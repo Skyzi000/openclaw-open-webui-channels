@@ -2,7 +2,7 @@
   "id": "open-webui",
   "name": "Open WebUI",
   "description": "Open WebUI channels integration via REST API and Socket.IO.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "channels": ["open-webui"],
   "configSchema": {
     "type": "object",

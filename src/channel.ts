@@ -295,7 +295,7 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
   id: "open-webui",
   meta,
   capabilities: {
-    chatTypes: ["channel"],
+    chatTypes: ["direct", "group", "channel"],
     media: true,
     reactions: true,
     threads: true,
@@ -738,8 +738,12 @@ async function handleChannelEvent(
     return;
   }
 
-  // Check if we should monitor this channel
-  if (account.channelIds.length > 0 && !account.channelIds.includes(event.channel_id)) {
+  // Determine channel type from event metadata
+  const channelType = event.channel?.type ?? null; // "standard" | "group" | "dm" | null
+  const isDm = channelType === "dm";
+
+  // Check if we should monitor this channel (DMs bypass channelIds filter, like Discord)
+  if (!isDm && account.channelIds.length > 0 && !account.channelIds.includes(event.channel_id)) {
     log?.debug?.(`[${account.accountId}] ignoring message from non-monitored channel ${event.channel_id}`);
     return;
   }
@@ -759,7 +763,7 @@ async function handleChannelEvent(
     wasMentioned = text.includes(mentionPattern);
   }
 
-  if (account.requireMention && !wasMentioned) {
+  if (account.requireMention && !wasMentioned && !isDm) {
     log?.debug?.(`[${account.accountId}] ignoring message without mention`);
     return;
   }
@@ -783,7 +787,7 @@ async function handleChannelEvent(
     channel: "open-webui",
     accountId: account.accountId,
     peer: {
-      kind: "group",
+      kind: isDm ? "dm" : channelType === "standard" ? "channel" : "group",
       id: parentId ? `${channelId}:${parentId}` : channelId,
     },
   });
@@ -828,7 +832,9 @@ async function handleChannelEvent(
   const rawChannelName = channelNameCache.get(`${account.accountId}:${channelId}`) ?? channelId;
   // Sanitize channel name to prevent header injection (strip brackets, newlines)
   const channelName = rawChannelName.replace(/[\[\]\n\r]/g, "").slice(0, 100);
-  const fromLabel = `Open WebUI #${channelName} channel id:${channelId}`;
+  const fromLabel = isDm
+    ? `${senderName} user id:${message.user_id}`
+    : `Open WebUI #${channelName} channel id:${channelId}`;
   const body = text;
   const contextPrefix = `${threadParentContext}${replyContext}`;
   const bodyForAgent = contextPrefix ? `${contextPrefix}${text}` : text;
@@ -843,7 +849,7 @@ async function handleChannelEvent(
     To: `open-webui:${outboundTarget}`,
     SessionKey: route.sessionKey,
     AccountId: account.accountId,
-    ChatType: "group" as const,
+    ChatType: (isDm ? "direct" : channelType === "standard" ? "channel" : "group") as "direct" | "channel" | "group",
     ConversationLabel: fromLabel,
     SenderName: senderName,
     SenderId: message.user_id,
