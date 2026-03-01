@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0] - 2026-03-01
+
+### Added
+
+- **Multi-Account Support**: Configure multiple Open WebUI bot accounts per plugin instance, each with its own credentials, channel subscriptions, and settings. Backward-compatible with flat (single-account) config.
+- **Per-Account `requireMention`**: Override `requireMention` at account level for fine-grained mention gating per bot.
+- **Implicit Mention Detection**: Replying to a bot's message now counts as a mention, even without explicit @mention syntax.
+- **Cross-Account Mention Gating**: When a message @mentions a specific bot, other bots in the same channel stay silent — even if they have `requireMention: false`.
+- **Group Channel Context Injection**: In group channels, agents automatically receive delegation rules and a roster of available specialists with correct @mention syntax, enabling bot-to-bot delegation visible to all participants.
+- **Mention Strip Patterns**: Added `mentions.stripPatterns` adapter to strip Open WebUI `<@U:USER_ID|Name>` syntax from message text before it reaches the agent.
+- **HURL Integration Tests**: Test suites for auth, messaging basics, and E2E mention routing (`tests/`).
+
+### Changed
+
+- `listAccountIds` / `defaultAccountId` now read from `accounts` config object instead of returning hardcoded `"default"`.
+- `setAccountEnabled` / `deleteAccount` operate per-account in multi-account mode.
+- `resolveOpenWebUIAccount` falls back to first configured account when requested ID doesn't exist.
+
 ## [0.4.2] - 2026-02-18
 
 ### Fixed

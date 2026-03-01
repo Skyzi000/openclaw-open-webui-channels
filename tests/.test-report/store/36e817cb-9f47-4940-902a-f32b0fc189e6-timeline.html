@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>/home/matthias/shares/openclaw-projects/40_dev/openclaw-open-webui-channels/tests/01-auth-and-channels.hurl</title>
+    <style>
+        body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.timeline-container {
+    max-width: 1400px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    border: solid 1px #dcdcde;
+    display: flex;
+}
+
+.calls {
+    position: sticky;
+    left: 0;
+    right: 0;
+    width: 260px;
+    flex-shrink: 0;
+}
+
+.waterfall {
+    overflow: auto;
+    overflow-y: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #19191c;
+        color: #c2c2c2;
+    }
+
+    .timeline-container {
+        border-color: #444;
+    }
+}
+
+        .report-nav {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.report-nav-links {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.report-nav a {
+    color: royalblue;
+    margin-right: 20px;
+}
+
+.report-nav a[aria-selected="true"] {
+    color: #ff0288;
+}
+
+.report-nav-summary > div {
+    display: flex;
+}
+
+.report-nav-summary .item-name {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: red 4px solid;
+}
+
+.error-desc {
+    background: #f5f5f5;
+}
+
+.error-desc pre {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0.75rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+}
+
+.error-desc pre code {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+.success, .success a {
+    color: green;
+}
+
+.failure, .failure a {
+    color: red;
+}
+
+@media (prefers-color-scheme: dark) {
+    .report-nav a {
+        color: #34a7ff;
+    }
+    
+    .success, .success a {
+        color: green;
+    }
+
+    .report-nav a[aria-selected="true"] {
+        color: #ff0288;
+    }
+
+    .error-desc {
+        background: #27272c;
+    }
+}
+
+    </style>
+<body>
+<div>
+    <div class="container">
+        <div class="report-nav">
+    <div class="report-nav-links">
+        <div><a href="../index.html">Report</a></div>
+        <div><a aria-selected="false" href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html">Source</a></div>
+        <div><a aria-selected="true" href="36e817cb-9f47-4940-902a-f32b0fc189e6-timeline.html">Timeline</a></div>
+        <div><a aria-selected="false" href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html">Run</a></div>
+    </div>
+    <div class="report-nav-summary">
+        <div><div class="item-name">File:</div><div><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html">/home/matthias/shares/openclaw-projects/40_dev/openclaw-open-webui-channels/tests/01-auth-and-channels.hurl</a></div></div>
+        <div><div class="item-name">Status:</div><div><span class="success"><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-timeline.html">success</a></span></div></div>
+        <div><div class="item-name">Duration:</div><div>530 ms</div></div>
+        <div><div class="item-name">Errors:</div><div>-</div></div>
+        <div></div>
+    </div>
+    <div class="errors"></div>
+</div>
+
+    </div>
+    <div class="timeline-container">
+        <div class="calls"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 396" width="260" height="396"><style>@media (prefers-color-scheme: dark) {
+    .calls-list {
+        fill: #c2c2c2;
+    }
+
+    .calls-back {
+        fill: #27272c;
+    }
+
+    .calls-grid rect {
+        fill: #444;
+    }
+}</style><symbol id="success" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" fill="#10bb00" /></symbol><symbol id="failure" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" fill="red" /></symbol><symbol id="retry" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" fill="gold" /></symbol><rect class="calls-back" x="0" y="0" width="100%" height="100%" fill="#fbfafd" /><g class="calls-grid"><rect x="0" y="50" width="260" height="1" fill="#ddd" /><rect x="0" y="73" width="260" height="1" fill="#ddd" /><rect x="0" y="98" width="260" height="1" fill="#ddd" /><rect x="0" y="121" width="260" height="1" fill="#ddd" /><rect x="0" y="146" width="260" height="1" fill="#ddd" /><rect x="0" y="169" width="260" height="1" fill="#ddd" /><rect x="259" y="0" width="1" height="396" fill="#ddd" /></g><g class="calls-list" font-size="13px" font-family="sans-serif" fill="#777"><use href="#success" x="7" y="56" width="13" height="13" /><text x="25" y="67"><title>POST webui.casa-mh.this/api/v1/auths/signin</title>POST webui.casa-mh.this/...</text><text x="205" y="67">200</text><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e1:c1"><text x="233" y="67" fill="royalblue" text-decoration="underline">run</text></a><use href="#success" x="7" y="80" width="13" height="13" /><text x="25" y="91"><title>POST webui.casa-mh.this/api/v1/auths/signin</title>POST webui.casa-mh.this/...</text><text x="205" y="91">200</text><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e2:c1"><text x="233" y="91" fill="royalblue" text-decoration="underline">run</text></a><use href="#success" x="7" y="104" width="13" height="13" /><text x="25" y="115"><title>GET webui.casa-mh.this/api/v1/channels/</title>GET webui.casa-mh.this/a...</text><text x="205" y="115">200</text><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e3:c1"><text x="233" y="115" fill="royalblue" text-decoration="underline">run</text></a><use href="#success" x="7" y="128" width="13" height="13" /><text x="25" y="139"><title>GET webui.casa-mh.this/api/v1/channels/</title>GET webui.casa-mh.this/a...</text><text x="205" y="139">200</text><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e4:c1"><text x="233" y="139" fill="royalblue" text-decoration="underline">run</text></a></g></svg></div>
+        <div class="waterfall"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1138 396" width="1138" height="396"><style>.call-detail {
+    display: none;
+}
+
+.call-summary:hover + .call-detail, .call-detail:hover {
+    display: block;
+}
+
+.call-sel {
+    pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .grid-strip rect {
+        fill: #27272c;
+    }
+
+    .grid-ticks {
+        stroke: #444;
+    }
+
+    .call-back {
+        stroke: #444;
+        fill: #19191c;
+    }
+
+    .call-sel {
+        opacity: 0.1;
+    }
+
+    .call-legend {
+        fill: #c2c2c2;
+    }
+}</style><defs><filter id="shadow"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25" /></filter></defs><symbol id="success" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" fill="#10bb00" /></symbol><symbol id="failure" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" fill="red" /></symbol><symbol id="retry" viewBox="0 0 512 512"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" fill="gold" /></symbol><g><g class="grid-strip"><rect x="0" y="50" width="1138" height="24" fill="#f5f5f5" /><rect x="0" y="98" width="1138" height="24" fill="#f5f5f5" /><rect x="0" y="146" width="1138" height="24" fill="#f5f5f5" /></g><g><g class="grid-ticks" stroke="#ccc"><line x1="215" y1="0" x2="215" y2="396" /><line x1="429" y1="0" x2="429" y2="396" /><line x1="644" y1="0" x2="644" y2="396" /><line x1="859" y1="0" x2="859" y2="396" /><line x1="1074" y1="0" x2="1074" y2="396" /></g><g font-size="15px" font-family="sans-serif" fill="#777"><text x="5" y="20">0 ms</text><text x="220" y="20">100 ms</text><text x="434" y="20">200 ms</text><text x="649" y="20">300 ms</text><text x="864" y="20">400 ms</text><text x="1079" y="20">500 ms</text></g></g></g><g><g class="call-summary"><rect x="1094.4179989923825" y="125" width="0.04079907465238139" height="18" fill="#1d9688" /><rect x="1094.5403962163398" y="125" width="43.35867975688869" height="18" fill="#18c852" /><rect x="1137.8990759732283" y="125" width="0.049388353526566946" height="18" fill="#36a9f4" /></g><g class="call-detail" font-family="sans-serif" font-size="17px"><rect x="1094.4179989923825" y="0" width="43.582001007617464" height="396" fill="green" opacity="0.05" class="call-sel" /><rect x="532" y="143" width="600" height="235" fill="white" class="call-back" filter="url(#shadow)" stroke="#ccc" stroke-width="1" /><g class="call-legend" fill="#555"><use href="#success" x="546" y="157" width="20" height="20" /><text x="576" y="173" font-weight="bold">GET http://webui.casa-mh.this/api/v1/channels/  200</text><g><rect x="558" y="189" width="20" height="20" fill="#1d9688" /><text x="594" y="206">DNS lookup</text><text x="738" y="206">19.0 µs</text></g><g><rect x="558" y="219" width="20" height="20" fill="#9933ff" /><text x="594" y="236">SSL handshake</text><text x="738" y="236">0.0 µs</text></g><g><rect x="558" y="249" width="20" height="20" fill="#18c852" /><text x="594" y="266">Wait</text><text x="738" y="266">20.2 ms</text></g><g><rect x="558" y="279" width="20" height="20" fill="#36a9f4" /><text x="594" y="296">Data transfer</text><text x="738" y="296">23.0 µs</text></g><g font-weight="bold"><text x="594" y="326">Total</text><text x="738" y="326">20.3 ms</text></g><g><text x="912" y="207">Start:</text><text x="1012" y="207">509.7 ms</text></g><g><text x="912" y="237">Stop:</text><text x="1012" y="237">530.0 ms</text></g><g><text x="912" y="267">Transferred:</text><text x="1012" y="267">2.7 kB</text></g><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e4:c1"><text x="912" y="323" fill="royalblue" text-decoration="underline">(view run)</text></a><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html#l54"><text x="1002" y="323" fill="royalblue" text-decoration="underline">(view source)</text></a><a href="https://hurl.dev/docs/response.html#timings"><text x="912" y="353" fill="royalblue" text-decoration="underline">Explanation</text></a></g></g></g><g><g class="call-summary"><rect x="1064.1687061172195" y="101" width="0.04079907465238139" height="18" fill="#1d9688" /><rect x="1064.3233131369548" y="101" width="29.42472210324117" height="18" fill="#18c852" /><rect x="1093.748035240196" y="101" width="0.06012495211929889" height="18" fill="#36a9f4" /></g><g class="call-detail" font-family="sans-serif" font-size="17px"><rect x="1064.1687061172195" y="0" width="29.693137068059514" height="396" fill="green" opacity="0.05" class="call-sel" /><rect x="532" y="119" width="600" height="235" fill="white" class="call-back" filter="url(#shadow)" stroke="#ccc" stroke-width="1" /><g class="call-legend" fill="#555"><use href="#success" x="546" y="133" width="20" height="20" /><text x="576" y="149" font-weight="bold">GET http://webui.casa-mh.this/api/v1/channels/  200</text><g><rect x="558" y="165" width="20" height="20" fill="#1d9688" /><text x="594" y="182">DNS lookup</text><text x="738" y="182">19.0 µs</text></g><g><rect x="558" y="195" width="20" height="20" fill="#9933ff" /><text x="594" y="212">SSL handshake</text><text x="738" y="212">0.0 µs</text></g><g><rect x="558" y="225" width="20" height="20" fill="#18c852" /><text x="594" y="242">Wait</text><text x="738" y="242">13.7 ms</text></g><g><rect x="558" y="255" width="20" height="20" fill="#36a9f4" /><text x="594" y="272">Data transfer</text><text x="738" y="272">28.0 µs</text></g><g font-weight="bold"><text x="594" y="302">Total</text><text x="738" y="302">13.8 ms</text></g><g><text x="912" y="183">Start:</text><text x="1012" y="183">495.6 ms</text></g><g><text x="912" y="213">Stop:</text><text x="1012" y="213">509.4 ms</text></g><g><text x="912" y="243">Transferred:</text><text x="1012" y="243">3.2 kB</text></g><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e3:c1"><text x="912" y="299" fill="royalblue" text-decoration="underline">(view run)</text></a><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html#l46"><text x="1002" y="299" fill="royalblue" text-decoration="underline">(view source)</text></a><a href="https://hurl.dev/docs/response.html#timings"><text x="912" y="329" fill="royalblue" text-decoration="underline">Explanation</text></a></g></g></g><g><g class="call-summary"><rect x="537.673826285986" y="77" width="0.049388353526566946" height="18" fill="#1d9688" /><rect x="537.834875264877" y="77" width="525.683192977623" height="18" fill="#18c852" /><rect x="1063.5180682425" y="77" width="0.09018742817894834" height="18" fill="#36a9f4" /></g><g class="call-detail" font-family="sans-serif" font-size="17px"><rect x="537.673826285986" y="0" width="526.0396480509016" height="396" fill="green" opacity="0.05" class="call-sel" /><rect x="532" y="95" width="600" height="235" fill="white" class="call-back" filter="url(#shadow)" stroke="#ccc" stroke-width="1" /><g class="call-legend" fill="#555"><use href="#success" x="546" y="109" width="20" height="20" /><text x="576" y="125" font-weight="bold">POST http://webui.casa-mh.this/api/v1/auths/signin  200</text><g><rect x="558" y="141" width="20" height="20" fill="#1d9688" /><text x="594" y="158">DNS lookup</text><text x="738" y="158">23.0 µs</text></g><g><rect x="558" y="171" width="20" height="20" fill="#9933ff" /><text x="594" y="188">SSL handshake</text><text x="738" y="188">0.0 µs</text></g><g><rect x="558" y="201" width="20" height="20" fill="#18c852" /><text x="594" y="218">Wait</text><text x="738" y="218">244.8 ms</text></g><g><rect x="558" y="231" width="20" height="20" fill="#36a9f4" /><text x="594" y="248">Data transfer</text><text x="738" y="248">42.0 µs</text></g><g font-weight="bold"><text x="594" y="278">Total</text><text x="738" y="278">244.9 ms</text></g><g><text x="912" y="159">Start:</text><text x="1012" y="159">250.4 ms</text></g><g><text x="912" y="189">Stop:</text><text x="1012" y="189">495.4 ms</text></g><g><text x="912" y="219">Transferred:</text><text x="1012" y="219">1.5 kB</text></g><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e2:c1"><text x="912" y="275" fill="royalblue" text-decoration="underline">(view run)</text></a><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html#l29"><text x="1002" y="275" fill="royalblue" text-decoration="underline">(view source)</text></a><a href="https://hurl.dev/docs/response.html#timings"><text x="912" y="305" fill="royalblue" text-decoration="underline">Explanation</text></a></g></g></g><g><g class="call-summary"><rect x="0" y="53" width="10.47247826735074" height="18" fill="#1d9688" /><rect x="10.47247826735074" y="53" width="0.2340578493215564" height="18" fill="#fa7f03" /><rect x="10.833227980066534" y="53" width="520.8388396925823" height="18" fill="#18c852" /><rect x="531.6720676726488" y="53" width="5.467076003419106" height="18" fill="#36a9f4" /></g><g class="call-detail" font-family="sans-serif" font-size="17px"><rect x="0" y="0" width="537.2830140972105" height="396" fill="green" opacity="0.05" class="call-sel" /><rect x="6" y="71" width="600" height="235" fill="white" class="call-back" filter="url(#shadow)" stroke="#ccc" stroke-width="1" /><g class="call-legend" fill="#555"><use href="#success" x="20" y="85" width="20" height="20" /><text x="50" y="101" font-weight="bold">POST http://webui.casa-mh.this/api/v1/auths/signin  200</text><g><rect x="32" y="117" width="20" height="20" fill="#1d9688" /><text x="68" y="134">DNS lookup</text><text x="212" y="134">4.9 ms</text></g><g><rect x="32" y="147" width="20" height="20" fill="#fa7f03" /><text x="68" y="164">TCP handshake</text><text x="212" y="164">109.0 µs</text></g><g><rect x="32" y="177" width="20" height="20" fill="#18c852" /><text x="68" y="194">Wait</text><text x="212" y="194">242.6 ms</text></g><g><rect x="32" y="207" width="20" height="20" fill="#36a9f4" /><text x="68" y="224">Data transfer</text><text x="212" y="224">2.5 ms</text></g><g font-weight="bold"><text x="68" y="254">Total</text><text x="212" y="254">250.1 ms</text></g><g><text x="386" y="135">Start:</text><text x="486" y="135">0.0 µs</text></g><g><text x="386" y="165">Stop:</text><text x="486" y="165">250.2 ms</text></g><g><text x="386" y="195">Transferred:</text><text x="486" y="195">1.5 kB</text></g><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-run.html#e1:c1"><text x="386" y="251" fill="royalblue" text-decoration="underline">(view run)</text></a><a href="36e817cb-9f47-4940-902a-f32b0fc189e6-source.html#l12"><text x="476" y="251" fill="royalblue" text-decoration="underline">(view source)</text></a><a href="https://hurl.dev/docs/response.html#timings"><text x="386" y="281" fill="royalblue" text-decoration="underline">Explanation</text></a></g></g></g></svg></div>
+    </div>
+</div>
+</body>
+</html>

@@ -28,6 +28,17 @@ const meta = {
 };
 
 // Config schema for Open WebUI
+export interface OpenWebUIAccountConfig {
+  email: string;
+  password: string;
+  userId?: string;
+  enabled?: boolean;
+  channelIds?: string[];
+  requireMention?: boolean;
+  name?: string;
+  description?: string;
+}
+
 export interface OpenWebUIChannelConfig {
   baseUrl: string;
   email: string;
@@ -38,6 +49,7 @@ export interface OpenWebUIChannelConfig {
   requireMention?: boolean;
   name?: string;
   textChunkLimit?: number;
+  accounts?: Record<string, OpenWebUIAccountConfig>;
 }
 
 export interface ResolvedOpenWebUIAccount {
@@ -56,18 +68,31 @@ export interface ResolvedOpenWebUIAccount {
 
 function resolveOpenWebUIAccount(cfg: OpenClawConfig, accountId?: string): ResolvedOpenWebUIAccount {
   const channelCfg = (cfg.channels as Record<string, unknown>)?.["open-webui"] as OpenWebUIChannelConfig | undefined;
-  
+  let id = accountId ?? "default";
+
+  // Multi-account: look up per-account overrides.
+  // If the requested id (e.g. "default") doesn't exist but other accounts do,
+  // fall back to the first configured account so users can name accounts freely.
+  let acct = channelCfg?.accounts?.[id];
+  if (!acct && channelCfg?.accounts) {
+    const keys = Object.keys(channelCfg.accounts);
+    if (keys.length > 0) {
+      id = keys[0];
+      acct = channelCfg.accounts[id];
+    }
+  }
+
   const baseUrl = channelCfg?.baseUrl ?? "";
-  const email = channelCfg?.email ?? "";
-  const password = channelCfg?.password ?? "";
-  const userId = channelCfg?.userId;
-  const enabled = channelCfg?.enabled ?? true;
-  const channelIds = channelCfg?.channelIds ?? [];
-  const requireMention = channelCfg?.requireMention ?? true;
-  const name = channelCfg?.name;
+  const email = acct?.email ?? channelCfg?.email ?? "";
+  const password = acct?.password ?? channelCfg?.password ?? "";
+  const userId = acct?.userId ?? channelCfg?.userId;
+  const enabled = acct?.enabled ?? channelCfg?.enabled ?? true;
+  const channelIds = acct?.channelIds ?? channelCfg?.channelIds ?? [];
+  const requireMention = acct?.requireMention ?? channelCfg?.requireMention ?? true;
+  const name = acct?.name ?? channelCfg?.name;
 
   return {
-    accountId: accountId ?? "default",
+    accountId: id,
     baseUrl,
     email,
     password,
@@ -79,6 +104,20 @@ function resolveOpenWebUIAccount(cfg: OpenClawConfig, accountId?: string): Resol
     name,
     config: channelCfg ?? {} as OpenWebUIChannelConfig,
   };
+}
+
+function listOpenWebUIAccountIds(cfg: OpenClawConfig): string[] {
+  const channelCfg = (cfg.channels as Record<string, unknown>)?.["open-webui"] as OpenWebUIChannelConfig | undefined;
+  if (channelCfg?.accounts && Object.keys(channelCfg.accounts).length > 0) {
+    return Object.keys(channelCfg.accounts);
+  }
+  // Flat config fallback
+  return ["default"];
+}
+
+function defaultOpenWebUIAccountId(cfg: OpenClawConfig): string {
+  const ids = listOpenWebUIAccountIds(cfg);
+  return ids[0] ?? "default";
 }
 
 function getAccountFromResolved(account: ResolvedOpenWebUIAccount): OpenWebUIAccount {
@@ -413,12 +452,28 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
   },
   reload: { configPrefixes: ["channels.open-webui"] },
   config: {
-    listAccountIds: () => ["default"],
+    listAccountIds: (cfg) => listOpenWebUIAccountIds(cfg),
     resolveAccount: (cfg, accountId) => resolveOpenWebUIAccount(cfg, accountId),
-    defaultAccountId: () => "default",
-    setAccountEnabled: ({ cfg, enabled }) => {
+    defaultAccountId: (cfg) => defaultOpenWebUIAccountId(cfg),
+    setAccountEnabled: ({ cfg, accountId, enabled }) => {
       const channels = (cfg.channels ?? {}) as Record<string, unknown>;
       const owui = (channels["open-webui"] ?? {}) as Record<string, unknown>;
+      const accounts = (owui.accounts ?? {}) as Record<string, Record<string, unknown>>;
+      const id = accountId ?? "default";
+      // Multi-account: set enabled on the specific account entry
+      if (accounts[id]) {
+        return {
+          ...cfg,
+          channels: {
+            ...channels,
+            "open-webui": {
+              ...owui,
+              accounts: { ...accounts, [id]: { ...accounts[id], enabled } },
+            },
+          },
+        } as OpenClawConfig;
+      }
+      // Flat config fallback
       return {
         ...cfg,
         channels: {
@@ -427,8 +482,26 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
         },
       } as OpenClawConfig;
     },
-    deleteAccount: ({ cfg }) => {
+    deleteAccount: ({ cfg, accountId }) => {
       const channels = (cfg.channels ?? {}) as Record<string, unknown>;
+      const owui = (channels["open-webui"] ?? {}) as Record<string, unknown>;
+      const accounts = (owui.accounts ?? {}) as Record<string, unknown>;
+      const id = accountId ?? "default";
+      // Multi-account: remove the specific account entry
+      if (accounts && accounts[id]) {
+        const { [id]: _, ...restAccounts } = accounts;
+        const updatedOwui = { ...owui, accounts: restAccounts };
+        // If no accounts left, remove the whole plugin config
+        if (Object.keys(restAccounts).length === 0) {
+          const { ["open-webui"]: __, ...restChannels } = channels;
+          return { ...cfg, channels: restChannels } as OpenClawConfig;
+        }
+        return {
+          ...cfg,
+          channels: { ...channels, "open-webui": updatedOwui },
+        } as OpenClawConfig;
+      }
+      // Flat config fallback: remove entire plugin config
       const { ["open-webui"]: _, ...rest } = channels;
       return { ...cfg, channels: rest } as OpenClawConfig;
     },
@@ -570,6 +643,12 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
         return /^[a-f0-9-]{36}$/i.test(value);
       },
       hint: "<channel_id>",
+    },
+  },
+  mentions: {
+    stripPatterns: () => {
+      // Strip Open WebUI mention syntax: <@U:USER_ID|Name> or <@U:USER_ID>
+      return ["<@U:[^>|]+(?:\\|[^>]*)?>"];
     },
   },
 };
@@ -764,6 +843,46 @@ async function handleChannelEvent(
     wasMentioned = text.includes(mentionPattern);
   }
 
+  // Check if ANY other bot is explicitly mentioned in this message
+  let anotherBotMentioned = false;
+  let anotherBotReplied = false;
+  for (const [otherAccountId, otherBotId] of accountBotUserId.entries()) {
+    if (otherAccountId === account.accountId) continue;
+    if (otherBotId && text.includes(`<@U:${otherBotId}`)) {
+      anotherBotMentioned = true;
+      break;
+    }
+  }
+
+  // Implicit mention: a reply to one of the bot's own messages counts as a mention
+  if (!wasMentioned && botUserId && message.reply_to_id) {
+    try {
+      const repliedMsg = await getMessageById(apiAccount, channelId, message.reply_to_id);
+      if (repliedMsg) {
+        if (repliedMsg.user_id === botUserId) {
+          wasMentioned = true;
+        } else {
+          // Check if the reply targets another bot's message
+          for (const [otherAccountId, otherBotId] of accountBotUserId.entries()) {
+            if (otherAccountId === account.accountId) continue;
+            if (repliedMsg.user_id === otherBotId) {
+              anotherBotReplied = true;
+              break;
+            }
+          }
+        }
+      }
+    } catch {
+      // If we can't fetch the replied message, don't treat as mention
+    }
+  }
+
+  // If another bot was specifically targeted (by @mention or reply), stay silent
+  if (!wasMentioned && (anotherBotMentioned || anotherBotReplied) && !isDm) {
+    log?.debug?.(`[${account.accountId}] ignoring message directed at another bot`);
+    return;
+  }
+
   if (account.requireMention && !wasMentioned && !isDm) {
     log?.debug?.(`[${account.accountId}] ignoring message without mention`);
     return;
@@ -828,6 +947,23 @@ async function handleChannelEvent(
     }
   }
 
+  // Build channel bot roster for agent context (so agents can @mention each other correctly)
+  const channelBots: { accountId: string; userId: string; name: string; description?: string; mentionSyntax: string }[] = [];
+  for (const [acctId, botId] of accountBotUserId.entries()) {
+    if (acctId === account.accountId) continue; // Exclude self
+    const acctCfg = config.channels?.["open-webui" as keyof typeof config.channels] as OpenWebUIChannelConfig | undefined;
+    const acctEntry = acctCfg?.accounts?.[acctId];
+    const acctName = acctEntry?.name ?? acctId;
+    const acctDesc = acctEntry?.description;
+    channelBots.push({
+      accountId: acctId,
+      userId: botId,
+      name: acctName,
+      description: acctDesc,
+      mentionSyntax: `<@U:${botId}|${acctName}>`,
+    });
+  }
+
   // Build context payload
   const outboundTarget = channelId;
   const rawChannelName = channelNameCache.get(`${account.accountId}:${channelId}`) ?? channelId;
@@ -837,7 +973,38 @@ async function handleChannelEvent(
     ? `${senderName} user id:${message.user_id}`
     : `Open WebUI #${channelName} channel id:${channelId}`;
   const body = text;
-  const contextPrefix = `${threadParentContext}${replyContext}`;
+
+  // Prepend group channel context: delegation rules + bot roster
+  let botRosterContext = "";
+  if (!isDm && channelBots.length > 0) {
+    const rosterLines = channelBots.map(b =>
+      b.description
+        ? `- ${b.name} (${b.description}): ${b.mentionSyntax}`
+        : `- ${b.name}: ${b.mentionSyntax}`
+    );
+    botRosterContext = [
+      "[Group Channel Context]",
+      "You are in a shared group channel. All participants (humans and bots) can read every message.",
+      "",
+      "Delegation rules:",
+      "- To delegate to a specialist, use the Send tool (action: send) to post an @mention in this channel.",
+      "- Always provide full context in your message — the other bot cannot see your internal state or conversation history.",
+      "- After delegating, you are DONE. Do NOT summarize, comment on, or repeat their response.",
+      "- Only become active again when a human addresses you directly or @mentions you.",
+      "- If another bot is @mentioned in a message (not you), IGNORE the message entirely. Do not respond.",
+      "  Exception: you are ALSO @mentioned in the same message, or the request clearly requires your expertise and the other bot cannot handle it alone.",
+      "- No endless loops: if a bot @mentions you and you @mention them back, max 2 round-trips. After that, ask the human.",
+      "",
+      "Available specialists:",
+      ...rosterLines,
+      "",
+      "To mention a specialist, copy their mention syntax exactly as shown above.",
+      "[End of group channel context]",
+      "",
+    ].join("\n");
+  }
+
+  const contextPrefix = `${botRosterContext}${threadParentContext}${replyContext}`;
   const bodyForAgent = contextPrefix ? `${contextPrefix}${text}` : text;
 
   const ctxPayload = {

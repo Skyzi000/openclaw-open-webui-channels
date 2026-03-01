@@ -8,6 +8,9 @@ A plugin that connects OpenClaw to Open WebUI Channels. Enables OpenClaw to act 
 
 - 🔌 **Real-time Connection**: Instant message sending and receiving via REST API and Socket.IO
 - 💬 **Bidirectional Messaging**: Supports both sending from OpenClaw and receiving from channels
+- 👥 **Multi-Account**: Run multiple bot accounts from a single plugin — each with its own credentials, channels, and mention settings
+- 🏷️ **Smart Mention Gating**: Per-account `requireMention`, implicit mentions via reply, and cross-account gating (only the @mentioned bot responds)
+- 🤝 **Group Channel Delegation**: Agents automatically receive a specialist roster with @mention syntax, enabling visible bot-to-bot collaboration in group channels
 - 📎 **Media Support**: Upload and download files and media
 - 🧵 **Thread Support**: Handle threads and replies
 - 👍 **Reactions**: Add and remove reactions on messages
@@ -79,7 +82,9 @@ OpenClaw will automatically update the configuration file (`~/.openclaw/openclaw
 
 #### Method B: Manual Configuration
 
-You can also directly edit `~/.openclaw/openclaw.json`:
+You can also directly edit `~/.openclaw/openclaw.json`.
+
+**Single account (simple):**
 
 ```json
 {
@@ -93,6 +98,49 @@ You can also directly edit `~/.openclaw/openclaw.json`:
       "requireMention": true
     }
   }
+}
+```
+
+**Multi-account (multiple bots in shared channels):**
+
+```json
+{
+  "channels": {
+    "open-webui": {
+      "enabled": true,
+      "baseUrl": "http://your-server:3000",
+      "requireMention": true,
+      "accounts": {
+        "default": {
+          "email": "butler@yourdomain.com",
+          "password": "...",
+          "name": "Butler",
+          "requireMention": false,
+          "channelIds": ["uuid-1", "uuid-2"]
+        },
+        "research-specialist": {
+          "email": "researcher@yourdomain.com",
+          "password": "...",
+          "name": "Research Specialist",
+          "requireMention": true,
+          "channelIds": ["uuid-2"]
+        }
+      }
+    }
+  }
+}
+```
+
+Each account gets its own Socket.IO connection and bot identity. Shared settings (`baseUrl`, `requireMention`) are inherited from the top level and can be overridden per account.
+
+You also need bindings to map accounts to agents:
+
+```json
+{
+  "bindings": [
+    { "match": { "channel": "open-webui", "accountId": "default" }, "agentId": "main" },
+    { "match": { "channel": "open-webui", "accountId": "research-specialist" }, "agentId": "research-specialist" }
+  ]
 }
 ```
 

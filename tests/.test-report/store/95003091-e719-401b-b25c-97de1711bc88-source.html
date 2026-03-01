@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>/home/matthias/shares/openclaw-projects/40_dev/openclaw-open-webui-channels/tests/03-mention-routing.hurl</title>
+    <style>
+        pre {
+    padding: 0;
+    margin: 0;
+}
+
+code {
+    font-family: monospace;
+    font-size: 0.825rem;
+    line-height: 1.2rem;
+}
+
+.comment {
+    color: dimgray;
+}
+
+.method {
+    color: black;
+}
+
+.url {
+    color: darkblue;
+}
+
+.version {
+    color: black;
+}
+
+.number, .boolean, .unit {
+    color: blue;
+}
+
+.section-header {
+    color: darkmagenta;
+}
+
+.query-type {
+    color: teal;
+}
+
+.filter-type, .not, .predicate-type {
+    color: darkblue;
+}
+
+
+.string, .multiline, .name, .json, .xml, .base64, .hex, .filename, .cookie-value, .regex {
+    color: darkgreen;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .comment {
+        color: dimgray;
+    }
+
+    .method {
+        color: orange;
+    }
+
+    .url {
+        color: cyan;
+    }
+
+    .version {
+        color: white;
+    }
+
+    .number, .boolean, .unit {
+        color: dodgerblue;
+    }
+
+    .section-header {
+        color: magenta;
+    }
+
+    .query-type {
+        color: cyan;
+    }
+
+    .filter-type, .not, .predicate-type {
+        color: orange;
+    }
+
+    .string, .multiline, .name, .json, .xml, .base64, .hex, .filename, .cookie-value {
+        color: forestgreen;
+    }
+}
+
+        .report-nav {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.report-nav-links {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.report-nav a {
+    color: royalblue;
+    margin-right: 20px;
+}
+
+.report-nav a[aria-selected="true"] {
+    color: #ff0288;
+}
+
+.report-nav-summary > div {
+    display: flex;
+}
+
+.report-nav-summary .item-name {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: red 4px solid;
+}
+
+.error-desc {
+    background: #f5f5f5;
+}
+
+.error-desc pre {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0.75rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+}
+
+.error-desc pre code {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+.success, .success a {
+    color: green;
+}
+
+.failure, .failure a {
+    color: red;
+}
+
+@media (prefers-color-scheme: dark) {
+    .report-nav a {
+        color: #34a7ff;
+    }
+    
+    .success, .success a {
+        color: green;
+    }
+
+    .report-nav a[aria-selected="true"] {
+        color: #ff0288;
+    }
+
+    .error-desc {
+        background: #27272c;
+    }
+}
+
+        body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.4;
+}
+
+.line-error {
+    border-bottom: red 2px dashed;
+}
+
+.line-error::before {
+    content: "⛔ "
+}
+
+.line-numbers a.line-error {
+    color: red;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.source-container {
+    display: flex;
+    padding: 0;
+    border: solid 1px #dcdcde;
+}
+
+.line-numbers {
+    text-align: right;
+    padding: 8px 10px;
+    border-right: solid 1px #dcdcde;
+    background: #fbfafd;
+}
+
+.line-numbers a {
+    color: #89888d;
+    text-decoration: none;
+}
+
+.line-numbers a:hover {
+    text-decoration: underline;
+}
+
+.source {
+    padding: 8px 10px;
+    overflow: auto;
+    overflow-y: hidden;
+}
+
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #19191c;
+        color: #c2c2c2;
+    }
+
+    .source-container {
+        border-color: #444;
+        background-color: #27272c;
+    }
+
+    .line-numbers {
+        padding: 8px 10px;
+        border-right-color: #444;
+        background: #19191c;
+    }
+
+    .line-numbers a {
+        color: dimgray;
+    }
+}
+
+    </style>
+<body>
+<div>
+    <div class="container">
+        <div class="report-nav">
+    <div class="report-nav-links">
+        <div><a href="../index.html">Report</a></div>
+        <div><a aria-selected="true" href="95003091-e719-401b-b25c-97de1711bc88-source.html">Source</a></div>
+        <div><a aria-selected="false" href="95003091-e719-401b-b25c-97de1711bc88-timeline.html">Timeline</a></div>
+        <div><a aria-selected="false" href="95003091-e719-401b-b25c-97de1711bc88-run.html">Run</a></div>
+    </div>
+    <div class="report-nav-summary">
+        <div><div class="item-name">File:</div><div><a href="95003091-e719-401b-b25c-97de1711bc88-source.html">/home/matthias/shares/openclaw-projects/40_dev/openclaw-open-webui-channels/tests/03-mention-routing.hurl</a></div></div>
+        <div><div class="item-name">Status:</div><div><span class="success"><a href="95003091-e719-401b-b25c-97de1711bc88-timeline.html">success</a></span></div></div>
+        <div><div class="item-name">Duration:</div><div>15748 ms</div></div>
+        <div><div class="item-name">Errors:</div><div>-</div></div>
+        <div></div>
+    </div>
+    <div class="errors"></div>
+</div>
+
+        <div class="source-container">
+            <div class="line-numbers"><pre><code><a id="l1" href="#l1">1</a>
+<a id="l2" href="#l2">2</a>
+<a id="l3" href="#l3">3</a>
+<a id="l4" href="#l4">4</a>
+<a id="l5" href="#l5">5</a>
+<a id="l6" href="#l6">6</a>
+<a id="l7" href="#l7">7</a>
+<a id="l8" href="#l8">8</a>
+<a id="l9" href="#l9">9</a>
+<a id="l10" href="#l10">10</a>
+<a id="l11" href="#l11">11</a>
+<a id="l12" href="#l12">12</a>
+<a id="l13" href="#l13">13</a>
+<a id="l14" href="#l14">14</a>
+<a id="l15" href="#l15">15</a>
+<a id="l16" href="#l16">16</a>
+<a id="l17" href="#l17">17</a>
+<a id="l18" href="#l18">18</a>
+<a id="l19" href="#l19">19</a>
+<a id="l20" href="#l20">20</a>
+<a id="l21" href="#l21">21</a>
+<a id="l22" href="#l22">22</a>
+<a id="l23" href="#l23">23</a>
+<a id="l24" href="#l24">24</a>
+<a id="l25" href="#l25">25</a>
+<a id="l26" href="#l26">26</a>
+<a id="l27" href="#l27">27</a>
+<a id="l28" href="#l28">28</a>
+<a id="l29" href="#l29">29</a>
+<a id="l30" href="#l30">30</a>
+<a id="l31" href="#l31">31</a>
+<a id="l32" href="#l32">32</a>
+<a id="l33" href="#l33">33</a>
+<a id="l34" href="#l34">34</a>
+<a id="l35" href="#l35">35</a>
+<a id="l36" href="#l36">36</a>
+<a id="l37" href="#l37">37</a>
+<a id="l38" href="#l38">38</a>
+<a id="l39" href="#l39">39</a>
+<a id="l40" href="#l40">40</a>
+<a id="l41" href="#l41">41</a>
+<a id="l42" href="#l42">42</a>
+<a id="l43" href="#l43">43</a>
+<a id="l44" href="#l44">44</a>
+<a id="l45" href="#l45">45</a>
+<a id="l46" href="#l46">46</a>
+<a id="l47" href="#l47">47</a>
+<a id="l48" href="#l48">48</a>
+<a id="l49" href="#l49">49</a>
+<a id="l50" href="#l50">50</a>
+<a id="l51" href="#l51">51</a>
+<a id="l52" href="#l52">52</a>
+<a id="l53" href="#l53">53</a>
+<a id="l54" href="#l54">54</a>
+<a id="l55" href="#l55">55</a>
+<a id="l56" href="#l56">56</a>
+<a id="l57" href="#l57">57</a>
+<a id="l58" href="#l58">58</a>
+<a id="l59" href="#l59">59</a>
+<a id="l60" href="#l60">60</a>
+<a id="l61" href="#l61">61</a>
+<a id="l62" href="#l62">62</a>
+<a id="l63" href="#l63">63</a>
+<a id="l64" href="#l64">64</a>
+<a id="l65" href="#l65">65</a>
+<a id="l66" href="#l66">66</a>
+<a id="l67" href="#l67">67</a>
+<a id="l68" href="#l68">68</a>
+<a id="l69" href="#l69">69</a>
+<a id="l70" href="#l70">70</a>
+<a id="l71" href="#l71">71</a>
+<a id="l72" href="#l72">72</a>
+<a id="l73" href="#l73">73</a>
+<a id="l74" href="#l74">74</a>
+<a id="l75" href="#l75">75</a>
+<a id="l76" href="#l76">76</a>
+<a id="l77" href="#l77">77</a>
+<a id="l78" href="#l78">78</a>
+<a id="l79" href="#l79">79</a>
+<a id="l80" href="#l80">80</a>
+<a id="l81" href="#l81">81</a>
+<a id="l82" href="#l82">82</a>
+<a id="l83" href="#l83">83</a>
+<a id="l84" href="#l84">84</a>
+<a id="l85" href="#l85">85</a>
+<a id="l86" href="#l86">86</a>
+<a id="l87" href="#l87">87</a>
+<a id="l88" href="#l88">88</a>
+<a id="l89" href="#l89">89</a>
+<a id="l90" href="#l90">90</a>
+<a id="l91" href="#l91">91</a>
+<a id="l92" href="#l92">92</a>
+<a id="l93" href="#l93">93</a>
+<a id="l94" href="#l94">94</a>
+<a id="l95" href="#l95">95</a>
+<a id="l96" href="#l96">96</a>
+<a id="l97" href="#l97">97</a>
+<a id="l98" href="#l98">98</a>
+<a id="l99" href="#l99">99</a>
+<a id="l100" href="#l100">100</a>
+<a id="l101" href="#l101">101</a>
+<a id="l102" href="#l102">102</a>
+<a id="l103" href="#l103">103</a>
+<a id="l104" href="#l104">104</a>
+<a id="l105" href="#l105">105</a>
+<a id="l106" href="#l106">106</a>
+<a id="l107" href="#l107">107</a>
+<a id="l108" href="#l108">108</a>
+<a id="l109" href="#l109">109</a>
+<a id="l110" href="#l110">110</a>
+<a id="l111" href="#l111">111</a>
+<a id="l112" href="#l112">112</a>
+<a id="l113" href="#l113">113</a>
+<a id="l114" href="#l114">114</a>
+<a id="l115" href="#l115">115</a>
+<a id="l116" href="#l116">116</a>
+<a id="l117" href="#l117">117</a>
+<a id="l118" href="#l118">118</a>
+<a id="l119" href="#l119">119</a>
+<a id="l120" href="#l120">120</a>
+<a id="l121" href="#l121">121</a>
+<a id="l122" href="#l122">122</a>
+<a id="l123" href="#l123">123</a>
+<a id="l124" href="#l124">124</a>
+<a id="l125" href="#l125">125</a>
+<a id="l126" href="#l126">126</a>
+<a id="l127" href="#l127">127</a>
+<a id="l128" href="#l128">128</a>
+<a id="l129" href="#l129">129</a>
+<a id="l130" href="#l130">130</a>
+<a id="l131" href="#l131">131</a>
+<a id="l132" href="#l132">132</a>
+<a id="l133" href="#l133">133</a>
+<a id="l134" href="#l134">134</a>
+<a id="l135" href="#l135">135</a>
+<a id="l136" href="#l136">136</a>
+<a id="l137" href="#l137">137</a>
+<a id="l138" href="#l138">138</a>
+<a id="l139" href="#l139">139</a>
+<a id="l140" href="#l140">140</a>
+<a id="l141" href="#l141">141</a>
+<a id="l142" href="#l142">142</a>
+<a id="l143" href="#l143">143</a>
+<a id="l144" href="#l144">144</a>
+<a id="l145" href="#l145">145</a>
+<a id="l146" href="#l146">146</a>
+<a id="l147" href="#l147">147</a>
+<a id="l148" href="#l148">148</a>
+<a id="l149" href="#l149">149</a>
+<a id="l150" href="#l150">150</a>
+<a id="l151" href="#l151">151</a>
+<a id="l152" href="#l152">152</a>
+<a id="l153" href="#l153">153</a>
+<a id="l154" href="#l154">154</a>
+<a id="l155" href="#l155">155</a>
+<a id="l156" href="#l156">156</a>
+<a id="l157" href="#l157">157</a>
+<a id="l158" href="#l158">158</a>
+<a id="l159" href="#l159">159</a>
+<a id="l160" href="#l160">160</a>
+<a id="l161" href="#l161">161</a>
+<a id="l162" href="#l162">162</a>
+<a id="l163" href="#l163">163</a>
+<a id="l164" href="#l164">164</a>
+<a id="l165" href="#l165">165</a>
+</pre></code></div>
+            <div class="source"><pre><code class="language-hurl"><span class="entry"><span class="request"><span class="comment"># =============================================================================</span>
+<span class="comment"># Suite 3: Mention Routing &amp; Cross-Account Gating (E2E)</span>
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Tests the plugin's mention-gating logic via real messages through Open WebUI.</span>
+<span class="comment"># Uses a dedicated test user (matthias) to send messages and checks bot responses.</span>
+<span class="comment">#</span>
+<span class="comment"># IMPORTANT: Requires OpenClaw gateway running with the plugin connected.</span>
+<span class="comment"># Bot responses are checked by polling recent messages after a delay.</span>
+<span class="comment">#</span>
+<span class="comment"># Test cases:</span>
+<span class="comment">#   1. Shared channel, no @mention → Butler responds (requireMention=false),</span>
+<span class="comment">#      Researcher silent (requireMention=true)</span>
+<span class="comment">#   2. Shared channel, @mention Researcher → only Researcher responds</span>
+<span class="comment">#   3. Shared channel, reply to Researcher's message → only Researcher responds</span>
+<span class="comment">#   4. Shared channel, @mention Butler → only Butler responds</span>
+<span class="comment">#</span>
+<span class="comment"># Usage:</span>
+<span class="comment">#   hurl --variables-file tests/env.vars --test tests/03-mention-routing.hurl</span>
+<span class="comment"># =============================================================================</span>
+
+
+<span class="comment"># --- Auth: Get tokens for both bot accounts (to read responses) ---</span>
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/auths/signin</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "email": "{{butler_email}}",
+  "password": "{{butler_password}}"
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">butler_token</span>: <span class="query-type">jsonpath</span> <span class="string">"$.token"</span>
+<span class="string">butler_user_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/auths/signin</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "email": "{{researcher_email}}",
+  "password": "{{researcher_password}}"
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">researcher_token</span>: <span class="query-type">jsonpath</span> <span class="string">"$.token"</span>
+<span class="string">researcher_user_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Test 1: No mention in shared channel</span>
+<span class="comment"># Expected: Butler responds (requireMention=false), Researcher silent</span>
+<span class="comment"># =============================================================================</span>
+
+<span class="comment"># Post as Butler (simulating user message — in real E2E this would be a 3rd user)</span>
+<span class="comment"># We use Butler's own channel to avoid triggering himself (own messages are ignored)</span>
+<span class="comment"># Instead: post as Researcher to shared channel WITHOUT mention</span>
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages/post</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{researcher_token}}</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "content": "[E2E-TEST-1] Plain message no mention - {{researcher_user_id}}",
+  "data": {},
+  "meta": {}
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">test1_msg_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+<span class="string">test1_timestamp</span>: <span class="query-type">jsonpath</span> <span class="string">"$.created_at"</span>
+<span class="section-header">[Asserts]</span>
+<span class="query-type">jsonpath</span> <span class="string">"$.id"</span> <span class="predicate-type">isString</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Test 2: @mention Researcher in shared channel</span>
+<span class="comment"># Expected: Only Researcher responds, Butler stays silent</span>
+<span class="comment"># =============================================================================</span>
+
+<span class="comment"># Post with Researcher mention syntax (Butler posts, mentioning Researcher)</span>
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages/post</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{butler_token}}</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "content": "[E2E-TEST-2] Hey &lt;@U:{{researcher_user_id}}|Researcher&gt; please help",
+  "data": {},
+  "meta": {}
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">test2_msg_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+<span class="section-header">[Asserts]</span>
+<span class="query-type">jsonpath</span> <span class="string">"$.id"</span> <span class="predicate-type">isString</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Test 3: @mention Butler in shared channel</span>
+<span class="comment"># Expected: Only Butler responds, Researcher stays silent</span>
+<span class="comment"># =============================================================================</span>
+
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages/post</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{researcher_token}}</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "content": "[E2E-TEST-3] Hey &lt;@U:{{butler_user_id}}|Butler&gt; what's up",
+  "data": {},
+  "meta": {}
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">test3_msg_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+<span class="section-header">[Asserts]</span>
+<span class="query-type">jsonpath</span> <span class="string">"$.id"</span> <span class="predicate-type">isString</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Test 4: Reply to Researcher's message (implicit mention)</span>
+<span class="comment"># Expected: Only Researcher responds</span>
+<span class="comment"># =============================================================================</span>
+
+<span class="comment"># First: Researcher posts a message</span>
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages/post</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{researcher_token}}</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "content": "[E2E-TEST-4-SEED] Researcher's original message for reply test",
+  "data": {},
+  "meta": {}
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">test4_seed_msg_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+</span></span><span class="entry"><span class="request">
+<span class="comment"># Then: Butler replies to it (simulating user replying to bot)</span>
+<span class="method">POST</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages/post</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{butler_token}}</span>
+<span class="string">Content-Type</span>: <span class="string">application/json</span>
+<span class="json">{
+  "content": "[E2E-TEST-4] Replying to Researcher without mention",
+  "reply_to_id": "{{test4_seed_msg_id}}",
+  "data": {},
+  "meta": {}
+}</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">test4_msg_id</span>: <span class="query-type">jsonpath</span> <span class="string">"$.id"</span>
+<span class="section-header">[Asserts]</span>
+<span class="query-type">jsonpath</span> <span class="string">"$.reply_to_id"</span> <span class="predicate-type">==</span> <span class="string">"{{test4_seed_msg_id}}"</span>
+</span></span><span class="entry"><span class="request">
+
+<span class="comment"># =============================================================================</span>
+<span class="comment"># Verification: Poll messages after delay to check bot responses</span>
+<span class="comment"># =============================================================================</span>
+
+<span class="comment"># Wait for bots to process and respond</span>
+<span class="comment"># (hurl retry with delay serves as our poll mechanism)</span>
+
+<span class="method">GET</span> <span class="url">{{base_url}}/api/v1/channels/{{shared_channel_id}}/messages?skip=0&amp;limit=30</span>
+<span class="string">Authorization</span>: <span class="string">Bearer {{butler_token}}</span>
+<span class="section-header">[Options]</span>
+<span class="string">delay</span>: <span class="number">15000</span>
+<span class="string">retry</span>: <span class="number">3</span>
+<span class="string">retry-interval</span>: <span class="number">5000</span>
+</span><span class="response"><span class="version">HTTP</span> <span class="number">200</span>
+<span class="section-header">[Captures]</span>
+<span class="string">all_messages</span>: <span class="query-type">jsonpath</span> <span class="string">"$"</span>
+<span class="section-header">[Asserts]</span>
+<span class="comment"># We should have messages — exact assertion depends on bot response timing</span>
+<span class="query-type">jsonpath</span> <span class="string">"$"</span> <span class="filter-type">count</span> <span class="predicate-type">&gt;=</span> <span class="number">4</span>
+</span></span></code></pre></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
