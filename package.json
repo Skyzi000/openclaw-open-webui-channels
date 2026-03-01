@@ -1,6 +1,6 @@
 {
   "name": "@skyzi000/open-webui",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "OpenClaw plugin to connect with Open WebUI Channels. Enables bidirectional communication with Open WebUI channels, making OpenClaw act as a user within Open WebUI.",
   "type": "module",
   "main": "index.ts",
