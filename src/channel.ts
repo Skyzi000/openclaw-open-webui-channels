@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { getOpenWebUIRuntime } from "./runtime.js";
 import {
   postMessage,
+  updateMessage,
   getAuthToken,
   getMessageById,
   addReaction,
@@ -296,6 +297,10 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
     media: true,
     reactions: true,
     threads: true,
+    blockStreaming: true,
+  },
+  streaming: {
+    blockStreamingCoalesceDefaults: { minChars: 300, idleMs: 800 },
   },
   threading: {
     resolveReplyToMode: () => "first",
@@ -509,9 +514,14 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
       const account = resolveOpenWebUIAccount(cfg, accountId);
       const apiAccount = getAccountFromResolved(account);
       try {
+        // Only use threadId as parentId if it looks like a bare UUID (same channel).
+        // Composite keys like "channelId:parentId" or cross-channel threadIds must
+        // not be sent — Open WebUI hides messages whose parent_id doesn't exist.
+        const safeParentId = threadId && /^[a-f0-9-]{36}$/i.test(String(threadId))
+          ? String(threadId) : undefined;
         const message = await postMessage(apiAccount, normalizedTo, text, {
           replyToId: replyToId ?? undefined,
-          parentId: threadId ? String(threadId) : undefined,
+          parentId: safeParentId,
         });
         return {
           channel: "open-webui",
@@ -543,9 +553,11 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
           dataPayload.files = uploadedFiles.map(wrapUploadedFile);
         }
 
+        const safeParentId = threadId && /^[a-f0-9-]{36}$/i.test(String(threadId))
+          ? String(threadId) : undefined;
         const message = await postMessage(apiAccount, normalizedTo, content, {
           replyToId: replyToId ?? undefined,
-          parentId: threadId ? String(threadId) : undefined,
+          parentId: safeParentId,
           data: dataPayload,
         });
         return {
@@ -892,14 +904,15 @@ async function handleChannelEvent(
   const textLimit = account.config.textChunkLimit ?? 4000;
 
   // Send typing indicator immediately and refresh every 4s (Open WebUI expires after 5s)
-  const typingMessageId = parentId ?? null;
+  // Open WebUI's frontend only shows "user is typing..." when message_id is null
+  // (channel-level typing). Thread-level typing (message_id !== null) is ignored.
   let typingInterval: ReturnType<typeof setInterval> | null = null;
   const emitTyping = (typing: boolean) => {
     const conn = getConnection(apiAccount);
     if (conn?.socket?.connected) {
       conn.socket.emit("events:channel", {
         channel_id: outboundTarget,
-        message_id: typingMessageId,
+        message_id: null,
         data: { type: "typing", data: { typing } },
       });
     }
@@ -916,6 +929,82 @@ async function handleChannelEvent(
       typingInterval = null;
     }
     emitTyping(false);
+  };
+
+  // --- Streaming state: post-then-edit approach ---
+  const STREAM_UPDATE_INTERVAL_MS = 600;
+  let streamingMessageId: string | null = null;
+  let streamingLastUpdate = 0;
+  let streamingLastText = "";
+  let streamingUpdateInFlight = false;
+  // Buffer the latest pending text so it's flushed after an in-flight request completes
+  let streamingPendingText: string | null = null;
+  let streamingFlushTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const flushStreamingUpdate = async (text: string) => {
+    streamingUpdateInFlight = true;
+    try {
+      if (!streamingMessageId) {
+        const posted = await postMessage(apiAccount, outboundTarget, text, {
+          replyToId: replyToId,
+          parentId: parentId,
+        });
+        if (posted?.id) {
+          streamingMessageId = posted.id;
+          streamingLastUpdate = Date.now();
+          await stopTyping();
+          log?.debug?.(`[${account.accountId}] streaming: posted initial message ${posted.id}`);
+        }
+      } else {
+        await updateMessage(apiAccount, outboundTarget, streamingMessageId, text);
+        streamingLastUpdate = Date.now();
+      }
+    } catch (err) {
+      log?.warn?.(`[${account.accountId}] streaming: update failed: ${String(err)}`);
+    } finally {
+      streamingUpdateInFlight = false;
+      // After completing, check if there's newer text buffered while we were in-flight
+      const pending = streamingPendingText;
+      if (pending && pending !== streamingLastText) {
+        streamingPendingText = null;
+        streamingLastText = pending;
+        void flushStreamingUpdate(pending);
+      }
+    }
+  };
+
+  const onPartialReply = async (payload: Record<string, unknown>) => {
+    const text = (payload.text as string | undefined)?.trim();
+    if (!text || text === streamingLastText) return;
+
+    // If in-flight or throttled, buffer the latest text instead of dropping it
+    if (streamingUpdateInFlight) {
+      streamingPendingText = text;
+      return;
+    }
+    const now = Date.now();
+    const timeSinceLastUpdate = now - streamingLastUpdate;
+    if (streamingMessageId && timeSinceLastUpdate < STREAM_UPDATE_INTERVAL_MS) {
+      streamingPendingText = text;
+      // Schedule a flush for when the throttle window expires
+      if (!streamingFlushTimer) {
+        const delay = STREAM_UPDATE_INTERVAL_MS - timeSinceLastUpdate;
+        streamingFlushTimer = setTimeout(() => {
+          streamingFlushTimer = null;
+          const pending = streamingPendingText;
+          if (pending && pending !== streamingLastText && !streamingUpdateInFlight) {
+            streamingPendingText = null;
+            streamingLastText = pending;
+            void flushStreamingUpdate(pending);
+          }
+        }, delay);
+      }
+      return;
+    }
+
+    streamingPendingText = null;
+    streamingLastText = text;
+    void flushStreamingUpdate(text);
   };
 
   const { dispatcher, replyOptions, markDispatchIdle } =
@@ -960,14 +1049,6 @@ async function handleChannelEvent(
             return;
           }
 
-          // Chunk if needed
-          const chunks = trimmed
-            ? core.channel.text.chunkMarkdownText(trimmed, textLimit)
-            : [""];
-          if (!chunks.length && trimmed) {
-            chunks.push(trimmed);
-          }
-
           const replyToOverride =
             (payloadRecord.replyToId as string | undefined) ??
             (payloadRecord.reply_to_id as string | undefined) ??
@@ -981,6 +1062,81 @@ async function handleChannelEvent(
           const dataPayloadWithFiles: Record<string, unknown> = { ...dataOverride };
           if (uploadedFiles.length > 0) {
             dataPayloadWithFiles.files = uploadedFiles.map(wrapUploadedFile);
+          }
+
+          // --- If we already have a streaming message, finalize it via edit ---
+          if (streamingMessageId) {
+            const chunks = trimmed
+              ? core.channel.text.chunkMarkdownText(trimmed, textLimit)
+              : [""];
+            if (!chunks.length && trimmed) chunks.push(trimmed);
+
+            if (chunks.length === 1) {
+              // Single chunk: edit the streaming message with the final content + files
+              const finalContent = chunks[0] === "" ? " " : chunks[0];
+              try {
+                await updateMessage(apiAccount, outboundTarget, streamingMessageId, finalContent, {
+                  data: Object.keys(dataPayloadWithFiles).length > 0 ? dataPayloadWithFiles : undefined,
+                  meta: Object.keys(metaOverride).length > 0 ? metaOverride : undefined,
+                });
+                log?.info(`[${account.accountId}] deliver: finalized streaming message ${streamingMessageId} (${finalContent.length}ch)`);
+              } catch (editErr) {
+                log?.error(`[${account.accountId}] deliver: failed to finalize streaming message, falling back to post: ${String(editErr)}`);
+                await postMessage(apiAccount, outboundTarget, finalContent, {
+                  replyToId: replyToOverride,
+                  parentId: parentOverride,
+                  data: dataPayloadWithFiles,
+                  meta: metaOverride,
+                });
+              }
+              streamingMessageId = null;
+              return;
+            }
+
+            // Multiple chunks: edit streaming message with first chunk, post the rest
+            const firstContent = chunks[0] === "" ? " " : chunks[0];
+            try {
+              await updateMessage(apiAccount, outboundTarget, streamingMessageId, firstContent, {
+                data: Object.keys(dataPayloadWithFiles).length > 0 ? dataPayloadWithFiles : undefined,
+                meta: Object.keys(metaOverride).length > 0 ? metaOverride : undefined,
+              });
+              log?.info(`[${account.accountId}] deliver: finalized streaming message ${streamingMessageId} as chunk 1/${chunks.length}`);
+            } catch (editErr) {
+              log?.error(`[${account.accountId}] deliver: failed to finalize streaming chunk 1, posting instead: ${String(editErr)}`);
+              await postMessage(apiAccount, outboundTarget, firstContent, {
+                replyToId: replyToOverride,
+                parentId: parentOverride,
+                data: dataPayloadWithFiles,
+                meta: metaOverride,
+              });
+            }
+            streamingMessageId = null;
+
+            // Post remaining chunks
+            for (let i = 1; i < chunks.length; i++) {
+              const content = chunks[i] === "" ? " " : chunks[i];
+              try {
+                const posted = await postMessage(apiAccount, outboundTarget, content, {
+                  replyToId: replyToOverride,
+                  parentId: parentOverride,
+                  data: dataOverride,
+                  meta: metaOverride,
+                });
+                log?.info(`[${account.accountId}] deliver: posted chunk ${i + 1}/${chunks.length} as ${posted.id}`);
+              } catch (postErr) {
+                log?.error(`[${account.accountId}] deliver: failed to post chunk ${i + 1}/${chunks.length}: ${String(postErr)}`);
+                throw postErr;
+              }
+            }
+            return;
+          }
+
+          // --- No streaming message: original post-based flow ---
+          const chunks = trimmed
+            ? core.channel.text.chunkMarkdownText(trimmed, textLimit)
+            : [""];
+          if (!chunks.length && trimmed) {
+            chunks.push(trimmed);
           }
 
           log?.info(`[${account.accountId}] deliver: posting ${chunks.length} chunk(s) (${trimmed.length} chars) to ${outboundTarget} (replyTo=${replyToOverride ?? "none"}, parent=${parentOverride ?? "none"})`);
@@ -1002,13 +1158,13 @@ async function handleChannelEvent(
               }
             } catch (postErr) {
               log?.error(`[${account.accountId}] deliver: failed to post chunk ${index + 1}/${chunks.length} to ${outboundTarget}: ${String(postErr)}`);
-              throw postErr; // Re-throw to let core handle the failure
+              throw postErr;
             }
           }
           log?.info(`[${account.accountId}] deliver: successfully posted to ${outboundTarget}`);
         } catch (deliverErr) {
           log?.error(`[${account.accountId}] deliver: unexpected error: ${String(deliverErr)}`);
-          throw deliverErr; // Re-throw so core knows delivery failed
+          throw deliverErr;
         }
       },
       onReplyStart: startTyping,
@@ -1023,11 +1179,18 @@ async function handleChannelEvent(
       ctx: finalizedCtx,
       cfg: config,
       dispatcher,
-      replyOptions,
+      replyOptions: {
+        ...replyOptions,
+        onPartialReply,
+      },
     });
   } catch (err) {
     log?.error(`[${account.accountId}] failed to dispatch message: ${String(err)}`);
   } finally {
+    if (streamingFlushTimer) {
+      clearTimeout(streamingFlushTimer);
+      streamingFlushTimer = null;
+    }
     markDispatchIdle();
     await stopTyping();
   }

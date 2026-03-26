@@ -257,6 +257,35 @@ export async function downloadFileContent(
   return { id: fileId, buffer, filename, mimeType };
 }
 
+export async function updateMessage(
+  account: OpenWebUIAccount,
+  channelId: string,
+  messageId: string,
+  content: string,
+  options?: { data?: Record<string, unknown>; meta?: Record<string, unknown> }
+): Promise<ChannelMessage> {
+  const response = await fetchWithAuthRetry(
+    account,
+    `${account.baseUrl}/api/v1/channels/${channelId}/messages/${messageId}/update`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content,
+        data: options?.data ?? {},
+        meta: options?.meta ?? {},
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`[open-webui] Failed to update message: ${response.status} - ${errorText}`);
+  }
+
+  return response.json() as Promise<ChannelMessage>;
+}
+
 export async function getMessageById(
   account: OpenWebUIAccount,
   channelId: string,
