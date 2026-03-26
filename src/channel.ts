@@ -514,9 +514,14 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
       const account = resolveOpenWebUIAccount(cfg, accountId);
       const apiAccount = getAccountFromResolved(account);
       try {
+        // Only use threadId as parentId if it looks like a bare UUID (same channel).
+        // Composite keys like "channelId:parentId" or cross-channel threadIds must
+        // not be sent — Open WebUI hides messages whose parent_id doesn't exist.
+        const safeParentId = threadId && /^[a-f0-9-]{36}$/i.test(String(threadId))
+          ? String(threadId) : undefined;
         const message = await postMessage(apiAccount, normalizedTo, text, {
           replyToId: replyToId ?? undefined,
-          parentId: threadId ? String(threadId) : undefined,
+          parentId: safeParentId,
         });
         return {
           channel: "open-webui",
@@ -548,9 +553,11 @@ export const openWebUIPlugin: ChannelPlugin<ResolvedOpenWebUIAccount> = {
           dataPayload.files = uploadedFiles.map(wrapUploadedFile);
         }
 
+        const safeParentId = threadId && /^[a-f0-9-]{36}$/i.test(String(threadId))
+          ? String(threadId) : undefined;
         const message = await postMessage(apiAccount, normalizedTo, content, {
           replyToId: replyToId ?? undefined,
-          parentId: threadId ? String(threadId) : undefined,
+          parentId: safeParentId,
           data: dataPayload,
         });
         return {
