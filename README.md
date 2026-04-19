@@ -12,6 +12,7 @@ A plugin that connects OpenClaw to Open WebUI Channels. Enables OpenClaw to act 
 - 🧵 **Thread Support**: Handle threads and replies
 - 👍 **Reactions**: Add and remove reactions on messages
 - ⌨️ **Typing Indicator**: Display when OpenClaw is composing a reply
+- ⚡ **Live-edit Streaming**: Agent replies appear incrementally by editing a single message in place as output accumulates. Enable with `channels.open-webui.streaming.block.enabled: true`
 - 📊 **Rich Rendering**: Take advantage of Open WebUI's excellent Markdown support — tables, syntax-highlighted code blocks, LaTeX math, and more render beautifully compared to platforms like Discord
 
 ## Requirements

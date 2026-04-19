@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0] - 2026-03-23
+
+### Added
+
+- Live-edit streaming: stream agent replies by editing a single Open WebUI message in place as agent output accumulates — made possible by Open WebUI's lack of character limits and native message-edit support. Enable via `channels.open-webui.streaming.block.enabled: true`.
+- Plugin-provided `blockStreamingCoalesceDefaults` (`minChars: 1500`, `idleMs: 1000`) tune how the channel core coalesces agent block chunks before each edit. Override via `channels.open-webui.streaming.block.coalesce`.
+- Tool-kind payloads close the active stream cleanly before posting the tool message as a standalone reply, preserving the live-edit message in its last state.
+
 ## [0.4.2] - 2026-02-18
 
 ### Fixed
