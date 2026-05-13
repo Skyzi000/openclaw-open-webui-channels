@@ -120,6 +120,16 @@ openclaw gateway restart
 - **ファイル送信**: OpenClawは画像やファイルを送信・受信できます
 - **スレッド対応**: スレッド内での会話も適切に処理されます
 
+### X/Twitter連携ワークフロー
+
+Open WebUI ChannelsはOpenClawのチャット接続を担当します。同じOpenClawワークスペースで構造化されたX/Twitter自動化も必要な場合は、別プラグインとして[TweetClaw](https://github.com/Xquik-dev/tweetclaw)をインストールしてください：
+
+- GitHub: <https://github.com/Xquik-dev/tweetclaw>
+- npm: <https://www.npmjs.com/package/@xquik/tweetclaw>
+- ClawHub: <https://clawhub.openclaw.ai/packages/@xquik/tweetclaw>
+
+TweetClawはツイート検索、リプライ検索、フォロワー出力、ユーザー検索、メディア処理、ダイレクトメッセージ、監視、Webhook、抽選、承認付きの投稿やリプライ投稿に使えます。特に外部に表示されるX/Twitter操作を許可する前に、Open WebUIチャンネルへのアクセスは信頼できるユーザーだけに限定してください。
+
 ## トラブルシューティング
 
 問題が発生した場合は、OpenClawに別の経路（WebUI、TUI等）で以下のように伝えてください：

@@ -120,6 +120,16 @@ Once setup is complete, OpenClaw will monitor messages in the specified channels
 - **File Sending**: OpenClaw can send and receive images and files
 - **Thread Support**: Conversations within threads are properly handled
 
+### Companion X/Twitter Workflows
+
+Open WebUI Channels handles chat transport for OpenClaw. If the same OpenClaw workspace also needs structured X/Twitter automation, install [TweetClaw](https://github.com/Xquik-dev/tweetclaw) as a separate plugin:
+
+- GitHub: <https://github.com/Xquik-dev/tweetclaw>
+- npm: <https://www.npmjs.com/package/@xquik/tweetclaw>
+- ClawHub: <https://clawhub.openclaw.ai/packages/@xquik/tweetclaw>
+
+Use TweetClaw for tweet search, reply search, follower export, user lookup, media workflows, direct messages, monitors, webhooks, giveaway draws, and approval-gated tweet or reply posting. Keep Open WebUI channel access limited to trusted users, especially before allowing visible X/Twitter actions.
+
 ## Troubleshooting
 
 If you encounter issues, tell OpenClaw via another channel (WebUI, TUI, etc.):
