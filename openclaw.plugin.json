@@ -3,10 +3,101 @@
   "name": "Open WebUI",
   "description": "Open WebUI channels integration via REST API and Socket.IO.",
   "version": "0.4.2",
-  "channels": ["open-webui"],
+  "channels": [
+    "open-webui"
+  ],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
     "properties": {}
+  },
+  "channelConfigs": {
+    "open-webui": {
+      "label": "Open WebUI",
+      "description": "Open WebUI channels integration via REST API and Socket.IO.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable the Open WebUI channel (default: true)."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Open WebUI base URL (fallback: OPEN_WEBUI_BASE_URL env var)."
+          },
+          "email": {
+            "type": "string",
+            "description": "Bot account email (fallback: OPEN_WEBUI_BOT_EMAIL env var)."
+          },
+          "password": {
+            "type": "string",
+            "description": "Bot account password (fallback: OPEN_WEBUI_BOT_PASSWORD env var)."
+          },
+          "userId": {
+            "type": "string",
+            "description": "Bot user id override."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name for this account."
+          },
+          "channelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Channel ids to join (empty = all)."
+          },
+          "requireMention": {
+            "type": "boolean",
+            "description": "Only respond when mentioned (default: true)."
+          },
+          "textChunkLimit": {
+            "type": "number",
+            "description": "Max characters per outgoing message chunk."
+          },
+          "replyToMode": {
+            "type": "string",
+            "enum": [
+              "off",
+              "first",
+              "all"
+            ],
+            "description": "Keep replyToId on sends (threading), like channels.slack.replyToMode."
+          },
+          "replyToModeByChatType": {
+            "type": "object",
+            "properties": {
+              "direct": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "first",
+                  "all"
+                ]
+              },
+              "group": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "first",
+                  "all"
+                ]
+              },
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "first",
+                  "all"
+                ]
+              }
+            },
+            "description": "Per-chat-type override of replyToMode."
+          }
+        }
+      }
+    }
   }
 }
